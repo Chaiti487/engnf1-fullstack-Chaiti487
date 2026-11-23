@@ -1,3 +1,23 @@
+# Backend and frontend environment files
+frontend/.env
+backend/.env
+
+# Production and temporary files
+*.log
+tmp/
+temp/
+
+# Prisma generated files (if applicable)
+backend/src/generated/prisma/
+
+#Local database files
+*.db
+*.sqlite
+
+
+
+
+
 # Logs
 logs
 *.log
