@@ -6,6 +6,8 @@ import Register from "./pages/Reg";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 import PagePlaceholder from "./components/PagePlaceholder";
+import TicketQueue from "./pages/TicketQueue";
+import TicketDetail from "./pages/TicketDetail";
 
 export default function App() {
   return (
@@ -18,15 +20,9 @@ export default function App() {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
-          <Route
-            path="/tickets"
-            element={
-              <PagePlaceholder
-                title="Ticket Triage"
-                description="Classify, review and resolve incoming tickets."
-              />
-            }
-          />
+          <Route path="/tickets" element={<TicketQueue />} />
+
+          <Route path="/tickets/:id" element={<TicketDetail />} />
 
           <Route
             path="/resources"
