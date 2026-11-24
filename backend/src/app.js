@@ -3,6 +3,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/auth.routes");
 const ticketRoutes = require("./routes/ticket.routes");
 const statsRoutes = require("./routes/stats.routes");
+const resourceRoutes = require("./routes/resource.routes");
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/stats", statsRoutes);
+app.use("/api/resources", resourceRoutes);
 
 
 module.exports = app;
