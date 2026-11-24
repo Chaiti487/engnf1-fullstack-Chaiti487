@@ -17,7 +17,12 @@ import AdminBookings from "./pages/AdminBookings";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 
-import AdminAnalytics from "./pages/AdminAnalytics";
+
+
+import { lazy, Suspense } from "react";
+import Loader from "./components/Loader";
+
+const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
 
 export default function App() {
   return (
@@ -45,7 +50,16 @@ export default function App() {
 
             <Route path="/admin/bookings" element={<AdminBookings />} />
 
-            <Route path="/admin/analytics" element={<AdminAnalytics />} />
+            <Route
+              path="/admin/analytics"
+              element={
+                <Suspense
+                  fallback={<Loader message="Loading analytics dashboard..." />}
+                >
+                  <AdminAnalytics />
+                </Suspense>
+              }
+            />
           </Route>
         </Route>
       </Route>
