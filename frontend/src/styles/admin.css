@@ -1,0 +1,182 @@
+/* Admin resource form */
+
+.admin-resource-form,
+.rejection-panel {
+    margin-bottom: 24px;
+}
+
+.resource-admin-form {
+    display: grid;
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.resource-admin-form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.resource-admin-form small {
+    font-size: 12px;
+}
+
+.admin-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+}
+
+/* Admin resource filters */
+
+.admin-resource-filters {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 2fr) minmax(0, 1fr);
+    gap: 14px;
+    margin: 22px 0;
+}
+
+/* Admin resource table */
+
+.admin-resource-table th:first-child {
+    width: 30%;
+}
+
+.admin-resource-table th:last-child {
+    width: 28%;
+}
+
+.admin-resource-table td {
+    overflow-wrap: anywhere;
+}
+
+.admin-table-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.admin-table-actions .btn {
+    padding: 8px 12px;
+    font-size: 11px;
+}
+
+.admin-resource-table .ticket-subject small {
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+/* Admin booking filters */
+
+.admin-booking-filters {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 14px;
+    margin: 24px 0;
+}
+
+.admin-booking-filters label {
+    font-size: 12px;
+}
+
+.admin-booking-filters input,
+.admin-booking-filters select {
+    font-size: 13px;
+}
+
+/* Booking information */
+
+.admin-booking-information {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.admin-booking-information>div {
+    display: grid;
+    gap: 8px;
+    padding: 16px;
+    min-width: 0;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.admin-booking-information strong {
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+/* Rejection form */
+
+.rejection-panel {
+    border-left: 4px solid #dc2626;
+}
+
+.rejection-summary {
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.rejection-summary strong {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.rejection-summary p {
+    margin-top: 8px;
+    font-size: 14px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+/* Responsive layout */
+
+@media (max-width: 1200px) {
+    .admin-booking-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 850px) {
+    .admin-booking-information {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-table-actions {
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .admin-resource-filters,
+    .admin-booking-filters,
+    .admin-booking-information {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .admin-form-actions {
+        width: 100%;
+    }
+
+    .admin-form-actions .btn {
+        flex: 1;
+    }
+
+    .admin-table-actions .btn {
+        padding: 8px;
+    }
+
+    .resource-admin-form .booking-time-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

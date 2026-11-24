@@ -3,13 +3,20 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Reg";
 
+import TicketQueue from "./pages/TicketQueue";
+import TicketDetail from "./pages/TicketDetail";
+
+import Resources from "./pages/Resources";
+import ResourceDetail from "./pages/ResourceDetail";
+
+import MyBookings from "./pages/MyBookings";
+
+import AdminResources from "./pages/AdminResources";
+import AdminBookings from "./pages/AdminBookings";
+
 import ProtectedRoute from "./routes/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 import PagePlaceholder from "./components/PagePlaceholder";
-import TicketQueue from "./pages/TicketQueue";
-import TicketDetail from "./pages/TicketDetail";
-import Resources from "./pages/Resources";
-import ResourceDetail from "./pages/ResourceDetail";
 
 export default function App() {
   return (
@@ -30,43 +37,19 @@ export default function App() {
 
           <Route path="/resources/:id" element={<ResourceDetail />} />
 
-          <Route
-            path="/bookings"
-            element={
-              <PagePlaceholder
-                title="My Bookings"
-                description="Track and manage your resource reservations."
-              />
-            }
-          />
+          <Route path="/bookings" element={<MyBookings />} />
 
           <Route element={<ProtectedRoute adminOnly />}>
+            <Route path="/admin/resources" element={<AdminResources />} />
+
+            <Route path="/admin/bookings" element={<AdminBookings />} />
+
             <Route
               path="/admin/analytics"
               element={
                 <PagePlaceholder
                   title="Admin Analytics"
-                  description="Monitor operational performance and insights."
-                />
-              }
-            />
-
-            <Route
-              path="/admin/resources"
-              element={
-                <PagePlaceholder
-                  title="Manage Resources"
-                  description="Create and manage workspace resources."
-                />
-              }
-            />
-
-            <Route
-              path="/admin/bookings"
-              element={
-                <PagePlaceholder
-                  title="Manage Bookings"
-                  description="Review, approve and reject booking requests."
+                  description="Monitor ticket and resource booking performance."
                 />
               }
             />
