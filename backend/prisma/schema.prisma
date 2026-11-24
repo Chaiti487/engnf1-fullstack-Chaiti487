@@ -84,9 +84,7 @@ model Ticket {
   events          TicketEvent[]
   bookings        Booking[]
 
-  @@index([status, category, priority])
-  @@index([assigneeId])
-  @@index([createdAt])
+  @@index([createdAt(sort: Desc), id(sort: Asc)], map: "tickets_created_at_id_idx")
   @@map("tickets")
 }
 
