@@ -16,7 +16,8 @@ import AdminBookings from "./pages/AdminBookings";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
-import PagePlaceholder from "./components/PagePlaceholder";
+
+import AdminAnalytics from "./pages/AdminAnalytics";
 
 export default function App() {
   return (
@@ -44,15 +45,7 @@ export default function App() {
 
             <Route path="/admin/bookings" element={<AdminBookings />} />
 
-            <Route
-              path="/admin/analytics"
-              element={
-                <PagePlaceholder
-                  title="Admin Analytics"
-                  description="Monitor ticket and resource booking performance."
-                />
-              }
-            />
+            <Route path="/admin/analytics" element={<AdminAnalytics />} />
           </Route>
         </Route>
       </Route>
