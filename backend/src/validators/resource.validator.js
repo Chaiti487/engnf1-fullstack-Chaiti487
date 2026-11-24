@@ -2,6 +2,9 @@ const { z } = require("zod");
 
 const resourceTypeSchema = z.enum(["ROOM", "LAB", "EQUIPMENT"]);
 
+
+const { utcDateTimeSchema, DAY_MS } = require("../utils/dateTime");
+
 const createResourceSchema = z
   .object({
     name: z.string().trim().min(3).max(60),
@@ -34,8 +37,37 @@ const resourceQuerySchema = z.object({
   page: z.coerce.number().int().min(1).max(1000000).default(1),
 });
 
+const availabilityQuerySchema = z
+  .object({
+    from: utcDateTimeSchema,
+    to: utcDateTimeSchema,
+  })
+  .superRefine((data, ctx) => {
+    const from = new Date(data.from);
+    const to = new Date(data.to);
+
+    if (to <= from) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["to"],
+        message: "End time must be after start time",
+      });
+
+      return;
+    }
+
+    if (to.getTime() - from.getTime() > 7 * DAY_MS) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["to"],
+        message: "Availability range cannot exceed 7 days",
+      });
+    }
+  });
+
 module.exports = {
   createResourceSchema,
   updateResourceSchema,
   resourceQuerySchema,
+  availabilityQuerySchema,
 };

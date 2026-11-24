@@ -6,6 +6,7 @@ const {
   createResourceSchema,
   updateResourceSchema,
   resourceQuerySchema,
+  availabilityQuerySchema,
 } = require("../validators/resource.validator");
 
 function handleResourceError(res, error) {
@@ -127,9 +128,44 @@ async function updateResource(req, res) {
   }
 }
 
+async function getResourceAvailability(req, res) {
+  try {
+    const resource = await resourceService.getResourceById(
+      req.params.id,
+      req.user.role,
+    );
+
+    if (!resource) {
+      return sendError(res, 404, "NOT_FOUND", "Resource not found");
+    }
+
+    const parsed = availabilityQuerySchema.safeParse(req.query);
+
+    if (!parsed.success) {
+      return sendError(
+        res,
+        400,
+        "VALIDATION_ERROR",
+        parsed.error.issues[0].message,
+      );
+    }
+
+    const availability = await resourceService.getResourceAvailability(
+      resource.id,
+      parsed.data.from,
+      parsed.data.to,
+    );
+
+    return res.status(200).json(availability);
+  } catch (error) {
+    return handleResourceError(res, error);
+  }
+}
+
 module.exports = {
   getResources,
   getResourceById,
   createResource,
   updateResource,
+  getResourceAvailability,
 };

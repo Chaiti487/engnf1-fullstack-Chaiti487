@@ -7,11 +7,14 @@ const {
   getResourceById,
   createResource,
   updateResource,
+  getResourceAvailability,
 } = require("../controllers/resource.controller");
 
 const router = express.Router();
 
 router.get("/", authenticate, getResources);
+
+router.get("/:id/availability", authenticate, getResourceAvailability);
 
 router.get("/:id", authenticate, getResourceById);
 

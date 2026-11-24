@@ -96,9 +96,50 @@ async function updateResource(id, data) {
   });
 }
 
+async function getResourceAvailability(resourceId, from, to) {
+  const start = new Date(from);
+  const end = new Date(to);
+
+  const bookings = await prisma.booking.findMany({
+    where: {
+      resourceId,
+
+      status: {
+        in: ["PENDING", "APPROVED"],
+      },
+
+      startTime: {
+        lt: end,
+      },
+
+      endTime: {
+        gt: start,
+      },
+    },
+
+    select: {
+      startTime: true,
+      endTime: true,
+      status: true,
+    },
+
+    orderBy: {
+      startTime: "asc",
+    },
+  });
+
+  return {
+    resourceId,
+    from: start.toISOString(),
+    to: end.toISOString(),
+    bookings,
+  };
+}
+
 module.exports = {
   getResources,
   getResourceById,
   createResource,
   updateResource,
+  getResourceAvailability,
 };
