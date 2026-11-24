@@ -81,6 +81,30 @@ test("Exactly one of ten concurrent booking requests succeeds", async () => {
     })),
   );
 
-  assert.equal(successful.length, 1);
-  assert.equal(conflicts.length, 9);
+  try {
+    assert.equal(successful.length, 1);
+    assert.equal(conflicts.length, 9);
+
+    for (const conflict of conflicts) {
+      assert.equal(conflict.body.error.code, "CONFLICT");
+
+      assert.equal(
+        conflict.body.error.message,
+        "The requested slot is unavailable",
+      );
+    }
+  } finally {
+    // Release slots created by this test.
+    for (const result of successful) {
+      const cleanupResponse = await fetch(
+        `${BASE_URL}/bookings/${result.body.id}/cancel`,
+        {
+          method: "PATCH",
+          headers,
+        },
+      );
+
+      assert.equal(cleanupResponse.status, 200);
+    }
+  }
 });

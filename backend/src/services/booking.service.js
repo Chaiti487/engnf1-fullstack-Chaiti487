@@ -1,4 +1,5 @@
 const prisma = require("../config/db");
+const { getPagination, paginatedResponse } = require("../utils/pagination");
 
 async function createBooking(userId, data) {
   const startTime = new Date(data.startTime);
@@ -148,6 +149,150 @@ async function createBooking(userId, data) {
   );
 }
 
+async function getBookings(filters, userId = null) {
+  const { status, resourceId, from, to, page } = filters;
+
+  const limit = 10;
+  const where = {};
+
+  if (userId) {
+    where.userId = userId;
+  }
+
+  if (status) {
+    where.status = status;
+  }
+
+  if (resourceId) {
+    where.resourceId = resourceId;
+  }
+
+  if (from) {
+    where.endTime = {
+      gt: new Date(from),
+    };
+  }
+
+  if (to) {
+    where.startTime = {
+      lt: new Date(to),
+    };
+  }
+
+  const pagination = getPagination(page, limit);
+
+  const [data, total] = await prisma.$transaction(
+    [
+      prisma.booking.findMany({
+        where,
+        ...pagination,
+        orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+      }),
+
+      prisma.booking.count({ where }),
+    ],
+    {
+      isolationLevel: "RepeatableRead",
+    },
+  );
+
+  return paginatedResponse(data, total, page, limit);
+}
+
+async function getBookingById(id) {
+  return prisma.booking.findUnique({
+    where: { id },
+  });
+}
+
+async function transitionBooking(id, user, action, note = null) {
+  return prisma.$transaction(
+    async (tx) => {
+      // Prevent concurrent conflicting decisions.
+
+      const rows = await tx.$queryRaw`
+        SELECT "id"
+        FROM "bookings"
+        WHERE "id" = ${id}
+        FOR UPDATE
+      `;
+
+      if (rows.length === 0) {
+        return { error: "BOOKING_NOT_FOUND" };
+      }
+
+      const booking = await tx.booking.findUnique({
+        where: { id },
+      });
+
+      if (action === "CANCEL" && booking.userId !== user.id) {
+        return { error: "FORBIDDEN" };
+      }
+
+      if (action !== "CANCEL" && user.role !== "ADMIN") {
+        return { error: "FORBIDDEN" };
+      }
+
+      if (booking.startTime <= new Date()) {
+        return { error: "BOOKING_ALREADY_STARTED" };
+      }
+
+      let nextStatus;
+
+      switch (action) {
+        case "CANCEL":
+          if (!["PENDING", "APPROVED"].includes(booking.status)) {
+            return { error: "INVALID_TRANSITION" };
+          }
+
+          nextStatus = "CANCELLED";
+          break;
+
+        case "APPROVE":
+          if (booking.status !== "PENDING") {
+            return { error: "INVALID_TRANSITION" };
+          }
+
+          nextStatus = "APPROVED";
+          break;
+
+        case "REJECT":
+          if (booking.status !== "PENDING") {
+            return { error: "INVALID_TRANSITION" };
+          }
+
+          nextStatus = "REJECTED";
+          break;
+
+        default:
+          return { error: "INVALID_TRANSITION" };
+      }
+
+      const updatedBooking = await tx.booking.update({
+        where: { id },
+
+        data: {
+          status: nextStatus,
+
+          ...(action === "REJECT" ? { decisionNote: note } : {}),
+        },
+      });
+
+      return {
+        booking: updatedBooking,
+      };
+    },
+    {
+      isolationLevel: "ReadCommitted",
+      maxWait: 20000,
+      timeout: 30000,
+    },
+  );
+}
+
 module.exports = {
   createBooking,
+  getBookings,
+  getBookingById,
+  transitionBooking,
 };

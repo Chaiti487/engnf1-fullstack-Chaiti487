@@ -61,6 +61,44 @@ const createBookingSchema = z
     }
   });
 
+const bookingStatusSchema = z.enum([
+  "PENDING",
+  "APPROVED",
+  "REJECTED",
+  "CANCELLED",
+]);
+
+const myBookingsQuerySchema = z.object({
+  status: bookingStatusSchema.optional(),
+
+  page: z.coerce.number().int().min(1).max(1000000).default(1),
+});
+
+const adminBookingsQuerySchema = myBookingsQuerySchema
+  .extend({
+    resourceId: z.string().trim().min(1).optional(),
+    from: utcDateTimeSchema.optional(),
+    to: utcDateTimeSchema.optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.from && data.to && new Date(data.from) >= new Date(data.to)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["to"],
+        message: "End time must be after start time",
+      });
+    }
+  });
+
+const rejectBookingSchema = z
+  .object({
+    note: z.string().trim().min(5).max(200),
+  })
+  .strict();
+
 module.exports = {
   createBookingSchema,
+  myBookingsQuerySchema,
+  adminBookingsQuerySchema,
+  rejectBookingSchema,
 };
