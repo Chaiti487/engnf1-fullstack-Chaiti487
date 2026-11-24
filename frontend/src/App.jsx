@@ -8,6 +8,8 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import PagePlaceholder from "./components/PagePlaceholder";
 import TicketQueue from "./pages/TicketQueue";
 import TicketDetail from "./pages/TicketDetail";
+import Resources from "./pages/Resources";
+import ResourceDetail from "./pages/ResourceDetail";
 
 export default function App() {
   return (
@@ -24,15 +26,9 @@ export default function App() {
 
           <Route path="/tickets/:id" element={<TicketDetail />} />
 
-          <Route
-            path="/resources"
-            element={
-              <PagePlaceholder
-                title="Resources"
-                description="Discover and reserve available resources."
-              />
-            }
-          />
+          <Route path="/resources" element={<Resources />} />
+
+          <Route path="/resources/:id" element={<ResourceDetail />} />
 
           <Route
             path="/bookings"
