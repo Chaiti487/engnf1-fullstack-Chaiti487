@@ -152,7 +152,122 @@ async function getTickets(filters) {
   return paginatedResponse(data, total, page, limit);
 }
 
+async function getTicketById(id) {
+  const ticket = await prisma.ticket.findUnique({
+    where: { id },
+    include: {
+      events: {
+        orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+      },
+    },
+  });
+
+  if (!ticket) {
+    return null;
+  }
+
+  const { events, ...ticketData } = ticket;
+
+  return {
+    ticket: ticketData,
+    events,
+  };
+}
+
+
+async function updateTicket(id, updates, actor) {
+  return prisma.$transaction(
+    async (tx) => {
+      const existing = await tx.ticket.findUnique({
+        where: { id },
+      });
+
+      if (!existing) {
+        return { error: "TICKET_NOT_FOUND" };
+      }
+
+      // Validate referenced assignee
+      if (updates.assigneeId !== undefined && updates.assigneeId !== null) {
+        const assignee = await tx.user.findUnique({
+          where: {
+            id: updates.assigneeId,
+          },
+        });
+
+        if (!assignee) {
+          return { error: "ASSIGNEE_NOT_FOUND" };
+        }
+      }
+
+      const trackedFields = ["category", "priority", "status", "assigneeId"];
+
+      const changes = {};
+      const events = [];
+
+      for (const field of trackedFields) {
+        if (
+          updates[field] !== undefined &&
+          updates[field] !== existing[field]
+        ) {
+          changes[field] = updates[field];
+
+          events.push({
+            ticketId: id,
+            field,
+            oldValue: existing[field],
+            newValue: updates[field],
+            actor,
+          });
+        }
+      }
+
+      // Protect human category decisions
+      if (changes.category !== undefined) {
+        changes.isHumanOverride = true;
+        changes.isReviewed = true;
+      }
+
+      // Mark ticket reviewed when leaving OPEN
+      if (existing.status === "OPEN" && changes.status !== undefined) {
+        changes.isReviewed = true;
+      }
+
+      let ticket = existing;
+
+      if (Object.keys(changes).length > 0) {
+        ticket = await tx.ticket.update({
+          where: { id },
+          data: changes,
+        });
+
+        await tx.ticketEvent.createMany({
+          data: events,
+        });
+      }
+
+      const history = await tx.ticketEvent.findMany({
+        where: {
+          ticketId: id,
+        },
+        orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+      });
+
+      return {
+        ticket,
+        events: history,
+      };
+    },
+    {
+      isolationLevel: "Serializable",
+      maxWait: 10000,
+      timeout: 30000,
+    },
+  );
+}
+
 module.exports = {
   importTickets,
   getTickets,
+  getTicketById,
+  updateTicket,
 };
