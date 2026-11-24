@@ -4,6 +4,7 @@ const authRoutes = require("./routes/auth.routes");
 const ticketRoutes = require("./routes/ticket.routes");
 const statsRoutes = require("./routes/stats.routes");
 const resourceRoutes = require("./routes/resource.routes");
+const bookingRoutes = require("./routes/booking.routes");
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/resources", resourceRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 
 module.exports = app;
