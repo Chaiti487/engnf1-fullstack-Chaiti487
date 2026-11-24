@@ -1,0 +1,143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TicketCategory {
+  BILLING
+  BUG
+  FEATURE_REQUEST
+  LOGIN
+  DELIVERY
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum ResourceType {
+  ROOM
+  LAB
+  EQUIPMENT
+}
+
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model User {
+  id              String    @id @default(uuid())
+  name            String    @db.VarChar(50)
+  email           String    @unique @db.VarChar(254)
+  passwordHash    String
+  role            Role      @default(USER)
+  createdAt       DateTime  @default(now())
+  assignedTickets Ticket[]
+  bookings        Booking[]
+
+  @@map("users")
+}
+
+model Ticket {
+  id              String         @id @default(uuid())
+  externalId      String         @unique
+  subject         String         @db.VarChar(150)
+  body            String         @db.VarChar(2000)
+  autoCategory    TicketCategory
+  category        TicketCategory
+  isHumanOverride Boolean        @default(false)
+  priority        Priority       @default(MEDIUM)
+  status          TicketStatus   @default(OPEN)
+  assigneeId      String?
+  isReviewed      Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  assignee        User?          @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+  events          TicketEvent[]
+  bookings        Booking[]
+
+  @@index([status, category, priority])
+  @@index([assigneeId])
+  @@index([createdAt])
+  @@map("tickets")
+}
+
+model TicketEvent {
+  id        String   @id @default(uuid())
+  ticketId  String
+  field     String
+  oldValue  String?
+  newValue  String?
+  actor     String
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId, createdAt])
+  @@map("ticket_events")
+}
+
+model Resource {
+  id          String       @id @default(uuid())
+  name        String       @unique @db.VarChar(60)
+  type        ResourceType
+  capacity    Int
+  description String?      @db.VarChar(300)
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+
+  bookings Booking[]
+
+  @@index([type, isActive])
+  @@map("resources")
+}
+
+model Booking {
+  id           String        @id @default(uuid())
+  resourceId   String
+  userId       String
+  ticketId     String?
+  startTime    DateTime      @db.Timestamptz(3)
+  endTime      DateTime      @db.Timestamptz(3)
+  purpose      String        @db.VarChar(200)
+  status       BookingStatus @default(PENDING)
+  decisionNote String?       @db.VarChar(200)
+  createdAt    DateTime      @default(now())
+
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Restrict)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  ticket   Ticket?  @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+
+  @@index([resourceId, status, startTime, endTime])
+  @@index([userId, createdAt])
+  @@index([ticketId])
+  @@map("bookings")
+}
