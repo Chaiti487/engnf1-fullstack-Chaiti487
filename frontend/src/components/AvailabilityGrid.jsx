@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { TIME_SLOTS, toUTC } from "../utils/bookingConstants";
 
 export default function AvailabilityGrid({
@@ -6,12 +7,21 @@ export default function AvailabilityGrid({
   onSelectSlot,
   selectedTime,
 }) {
+   const [currentTime, setCurrentTime] = useState(() => Date.now());
+
+   useEffect(() => {
+     const timer = setInterval(() => {
+       setCurrentTime(Date.now());
+     }, 1000);
+
+     return () => clearInterval(timer);
+   }, []);
   function getSlotStatus(time) {
     const start = new Date(toUTC(date, time));
 
     const end = new Date(start.getTime() + 30 * 60 * 1000);
 
-    if (start.getTime() <= Date.now()) {
+    if (start.getTime() <= currentTime) {
       return "past";
     }
 
