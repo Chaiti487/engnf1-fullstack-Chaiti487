@@ -79,7 +79,11 @@ async function createBooking(req, res) {
       );
     }
 
-    console.error("Create booking error:", error);
+  console.error("Create booking error:", {
+    code: error.code,
+    message: error.message,
+    meta: error.meta,
+  });
 
     return sendError(
       res,

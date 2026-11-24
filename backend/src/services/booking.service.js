@@ -143,8 +143,8 @@ async function createBooking(userId, data) {
     },
     {
       isolationLevel: "ReadCommitted",
-      maxWait: 20000,
-      timeout: 30000,
+      maxWait: 60000,
+      timeout: 120000,
     },
   );
 }
