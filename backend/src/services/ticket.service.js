@@ -1,5 +1,8 @@
 const prisma = require("../config/db");
 const { classifyTicket } = require("./ticketClassifier");
+const { getPagination, paginatedResponse } = require("../utils/pagination");
+
+const { escapeSearch } = require("../utils/search");
 
 async function importTickets(tickets) {
   return prisma.$transaction(
@@ -93,6 +96,63 @@ async function importTickets(tickets) {
   );
 }
 
+async function getTickets(filters) {
+  const { status, category, priority, q, page, limit } = filters;
+
+  const where = {};
+
+  if (status) {
+    where.status = status;
+  }
+
+  if (category) {
+    where.category = category;
+  }
+
+  if (priority) {
+    where.priority = priority;
+  }
+
+  if (q) {
+    const searchTerm = escapeSearch(q);
+
+    where.OR = [
+      {
+        subject: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      },
+      {
+        body: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      },
+    ];
+  }
+
+  const pagination = getPagination(page, limit);
+
+  const [data, total] = await prisma.$transaction(
+    [
+      prisma.ticket.findMany({
+        where,
+        ...pagination,
+        orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+      }),
+
+      prisma.ticket.count({ where }),
+    ],
+    {
+      isolationLevel: "RepeatableRead",
+    },
+  );
+
+  return paginatedResponse(data, total, page, limit);
+}
+
 module.exports = {
   importTickets,
+  getTickets,
 };

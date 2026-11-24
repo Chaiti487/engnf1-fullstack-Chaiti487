@@ -1,6 +1,9 @@
 const sendError = require("../utils/apiError");
 
-const { importTicketsSchema } = require("../validators/ticket.validator");
+const {
+  importTicketsSchema,
+  ticketQuerySchema,
+} = require("../validators/ticket.validator");
 
 const ticketService = require("../services/ticket.service");
 
@@ -49,6 +52,37 @@ async function importTickets(req, res) {
   }
 }
 
+
+async function getTickets(req, res) {
+  const result = ticketQuerySchema.safeParse(req.query);
+
+  if (!result.success) {
+    return sendError(
+      res,
+      400,
+      "VALIDATION_ERROR",
+      result.error.issues[0].message,
+    );
+  }
+
+  try {
+    const tickets = await ticketService.getTickets(result.data);
+
+    return res.status(200).json(tickets);
+  } catch (error) {
+    console.error("Get tickets error:", error);
+
+    return sendError(
+      res,
+      500,
+      "INTERNAL_SERVER_ERROR",
+      "Failed to fetch tickets",
+    );
+  }
+}
+
+
 module.exports = {
   importTickets,
+  getTickets,
 };
