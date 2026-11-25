@@ -44,20 +44,22 @@ database-level concurrency controls.
 
 ---
 
+
 ## 2. Live Links
 
 | Service | URL |
 |---|---|
-| Frontend | Pending deployment |
-| Backend API | Pending deployment |
-| GitHub Repository | [Source Code](https://github.com/Chaiti487/engnf1-fullstack-Chaiti487) |
+| Frontend | [Live Application](https://triagesync-chaiti487.vercel.app) |
+| Backend | [Render Backend](https://engnf1-fullstack-chaiti487.onrender.com) |
+| GitHub | [Source Code](https://github.com/Chaiti487/engnf1-fullstack-Chaiti487) |
 | Database | Neon PostgreSQL |
 
-The application uses a hosted PostgreSQL database.
-Database credentials are maintained privately through
-environment variables.
+The frontend is hosted on Vercel, the backend on Render,
+and the persistent PostgreSQL database on Neon.
 
----
+The free backend instance may experience cold-start delays
+after periods of inactivity.
+
 
 ## 3. Seeded Credentials
 
